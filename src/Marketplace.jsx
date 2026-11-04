@@ -1,11 +1,48 @@
+import React, { useState } from 'react'
 import {
   Box,
   Card,
   CardContent,
+  IconButton,
   Typography,
 } from '@mui/material';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
-function Marketplace() {
+const ITEMS = [
+  {
+    id: 1,
+    emoji: '🚲',
+    name: 'Bicycle',
+    price: 80
+  },
+  {
+    id: 2,
+    emoji: '🪑',
+    name: 'Desk chair',
+    price: 25
+  },
+  {
+    id: 3,
+    emoji: '📚',
+    name: 'Books',
+    price: 15
+  }
+]
+
+const Marketplace = () => {
+
+  const [favourites, setFavourites] = useState([]);
+
+  const handleFavourite = (id) => {
+    // Remove the id if it is already a favourite, otherwise add it
+    if (favourites.includes(id)) {
+      setFavourites(favourites.filter((favouriteId) => favouriteId !== id));
+    } else {
+      setFavourites([...favourites, id]);
+    }
+  }
+
   return (
     <Box component="section">
       <Typography variant="h5" component="h1" gutterBottom>
@@ -26,38 +63,36 @@ function Marketplace() {
           gap: 2,
         }}
       >
-        <Card component="article">
-          <Box sx={{ bgcolor: 'grey.100', textAlign: 'center', p: 3, fontSize: 64 }}>
-            🚲
-          </Box>
-          <CardContent>
-            <Typography fontWeight="bold">$80</Typography>
-            <Typography component="h3" variant="subtitle1">Bicycle</Typography>
-          </CardContent>
-        </Card>
+        {
+          ITEMS.map((item) => {
+            const isFavourite = favourites.includes(item.id);
 
-        <Card component="article">
-          <Box sx={{ bgcolor: 'grey.100', textAlign: 'center', p: 3, fontSize: 64 }}>
-            🪑
-          </Box>
-          <CardContent>
-            <Typography fontWeight="bold">$25</Typography>
-            <Typography component="h3" variant="subtitle1">Desk chair</Typography>
-          </CardContent>
-        </Card>
-
-        <Card component="article">
-          <Box sx={{ bgcolor: 'grey.100', textAlign: 'center', p: 3, fontSize: 64 }}>
-            📚
-          </Box>
-          <CardContent>
-            <Typography fontWeight="bold">$15</Typography>
-            <Typography component="h3" variant="subtitle1">Books</Typography>
-          </CardContent>
-        </Card>
+            return (
+              <Card component="article" key={item.id}>
+                <Box sx={{ bgcolor: 'grey.100', textAlign: 'center', p: 3, fontSize: 64 }}>
+                  {item.emoji}
+                </Box>
+                <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography fontWeight="bold">${item.price}</Typography>
+                    <Typography component="h3" variant="subtitle1">{item.name}</Typography>
+                  </Box>
+                  <IconButton
+                    color="error"
+                    aria-label={`Favourite ${item.name}`}
+                    aria-pressed={isFavourite}
+                    onClick={() => handleFavourite(item.id)}
+                  >
+                    {isFavourite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+                  </IconButton>
+                </CardContent>
+              </Card>
+            )
+          })
+        }
       </Box>
     </Box>
-  );
+  )
 }
 
-export default Marketplace;
+export default Marketplace

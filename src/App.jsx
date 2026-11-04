@@ -1,122 +1,91 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState } from 'react';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [isLiked, setIsLiked] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      <header className="page-header bg-white shadow-sm">
+        <nav className="header-navigation container d-flex align-items-center gap-3 py-3">
+          <h1 className="site-name text-primary fw-bold mb-0">facebook</h1>
 
-      <div className="ticks"></div>
+          <input
+            type="search"
+            className="search-input form-control rounded-pill"
+            placeholder="Search Facebook"
+            aria-label="Search Facebook"
+          />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          <button className="home-button btn btn-primary">Home</button>
+        </nav>
+      </header>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+      <main className="page-content container py-4">
+        <div className="feed-layout row justify-content-center">
+          <div className="feed col-12 col-md-8 col-lg-6">
+            <h2 className="feed-title h4 mb-3">Your feed</h2>
+
+            <article className="post-card card border-0 shadow-sm">
+              <div className="post-content card-body">
+                <div className="post-author d-flex align-items-center gap-3 mb-3">
+                  <div className="profile-avatar">P</div>
+
+                  <div className="author-details">
+                    <h3 className="author-name h6 mb-1">Phuong</h3>
+                    <small className="post-time text-secondary">
+                      Just now · Public
+                    </small>
+                  </div>
+                </div>
+
+                <p className="post-text">
+                  Hello everyone! This is my first post.
+                </p>
+
+                <p className="like-count text-secondary small mb-0">
+                  {isLiked ? '1 like' : '0 likes'}
+                </p>
+                <hr className="post-divider" />
+
+                <div className="post-actions d-flex gap-2">
+                  <button
+                    className={`like-button btn flex-fill ${
+                      isLiked ? 'btn-primary' : 'btn-light'
+                    }`}
+                    onClick={() => setIsLiked(!isLiked)}
+                    aria-pressed={isLiked}
+                  >
+                    {isLiked ? 'Liked' : 'Like'}
+                  </button>
+                  <button
+                    className="comment-button btn btn-light flex-fill"
+                    onClick={() => setShowComments(!showComments)}
+                    aria-expanded={showComments}
+                  >
+                    Comment
+                  </button>
+                  <button className="share-button btn btn-light flex-fill">
+                    Share
+                  </button>
+                </div>
+                {showComments && (
+                  <div className="comment-section mt-3">
+                    <input
+                      type="text"
+                      className="comment-input form-control rounded-pill"
+                      placeholder="Write a comment..."
+                      aria-label="Write a comment"
+                    />
+                  </div>
+                )}
+              </div>
+            </article>
+          </div>
+        </div>
+      </main>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

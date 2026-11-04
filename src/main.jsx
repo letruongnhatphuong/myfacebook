@@ -1,12 +1,20 @@
-import 'bootstrap/dist/css/bootstrap.min.css'
-import './index.css'
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.jsx'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import App from './App.jsx';
 
-const root = createRoot(document.getElementById('root'))
-root.render(
+const theme = createTheme({
+  palette: {
+    primary: { main: '#1877f2' },
+    background: { default: '#f0f2f5' },
+  },
+});
+
+createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
-  </StrictMode>
-)
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <App />
+    </ThemeProvider>
+  </StrictMode>,
+);

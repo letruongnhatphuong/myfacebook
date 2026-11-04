@@ -7,8 +7,8 @@ import {
 
 function Marketplace() {
   return (
-    <Box component="section" sx={{ mt: 4 }}>
-      <Typography variant="h5" component="h2" gutterBottom>
+    <Box component="section">
+      <Typography variant="h5" component="h1" gutterBottom>
         Marketplace
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>

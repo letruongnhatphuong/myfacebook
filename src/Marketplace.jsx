@@ -1,13 +1,17 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import {
   Box,
+  Button,
   Card,
+  CardActions,
   CardContent,
   IconButton,
   Typography,
 } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import CartContext from './context/CartContext'
 
 const ITEMS = [
   {
@@ -32,6 +36,7 @@ const ITEMS = [
 
 const Marketplace = () => {
 
+  const { handleAddToCart } = useContext(CartContext);
   const [favourites, setFavourites] = useState([]);
 
   const handleFavourite = (id) => {
@@ -86,6 +91,16 @@ const Marketplace = () => {
                     {isFavourite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
                   </IconButton>
                 </CardContent>
+                <CardActions>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    startIcon={<AddShoppingCartIcon />}
+                    onClick={() => handleAddToCart(item)}
+                  >
+                    Add to cart
+                  </Button>
+                </CardActions>
               </Card>
             )
           })

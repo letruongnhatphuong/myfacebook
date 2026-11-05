@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import { useContext, useState } from 'react'
 import {
   Box,
   Button,
@@ -40,7 +40,6 @@ const Marketplace = () => {
   const [favourites, setFavourites] = useState([]);
 
   const handleFavourite = (id) => {
-    // Remove the id if it is already a favourite, otherwise add it
     if (favourites.includes(id)) {
       setFavourites(favourites.filter((favouriteId) => favouriteId !== id));
     } else {
@@ -51,7 +50,7 @@ const Marketplace = () => {
   return (
     <Box component="section">
       <Typography variant="h5" component="h1" gutterBottom>
-        Marketplace
+        Not Marketplace
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>
         Items for sale

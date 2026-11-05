@@ -1,0 +1,22 @@
+rules_version = '2';
+
+// Paste these rules into Firebase Console > Firestore Database > Rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /products/{productId} {
+      // Any logged-in user can read listings (needed for the marketplace).
+      allow read: if request.auth != null;
+
+      // Users can only create products under their own account.
+      allow create: if request.auth != null
+        && request.resource.data.ownerId == request.auth.uid;
+
+      // Only the owner can edit or delete a product, and cannot hand it to someone else.
+      allow update: if request.auth != null
+        && resource.data.ownerId == request.auth.uid
+        && request.resource.data.ownerId == request.auth.uid;
+      allow delete: if request.auth != null
+        && resource.data.ownerId == request.auth.uid;
+    }
+  }
+}

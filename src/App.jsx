@@ -11,7 +11,6 @@ import {
 } from '@mui/material';
 import Login from './Login.jsx';
 import Marketplace from './Marketplace.jsx';
-import SellProduct from './SellProduct.jsx';
 
 function App() {
   const { pathname } = useLocation();
@@ -56,7 +55,6 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/sell" element={<SellProduct user={user} authReady={authReady} />} />
           <Route path="*" element={<Typography component="h1" variant="h5">Page not found</Typography>} />
         </Routes>
       </Container>

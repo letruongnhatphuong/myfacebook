@@ -2,17 +2,15 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
+// Shared public web configuration so every teammate uses the same Firebase project.
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: 'AIzaSyCAaWYeGv1B9PqbdxYlXawwL2pjO1RPMVs',
+  authDomain: 'notmarketplace.firebaseapp.com',
+  projectId: 'notmarketplace',
+  appId: '1:258687618136:web:3b3bb88914264b519f4e2d',
 };
 
-// Firebase only starts when every config value is present (see .env.local).
-const app = Object.values(firebaseConfig).every(Boolean)
-  ? initializeApp(firebaseConfig)
-  : null;
+const app = initializeApp(firebaseConfig);
 
-export const auth = app ? getAuth(app) : null;
-export const db = app ? getFirestore(app) : null;
+export const auth = getAuth(app);
+export const db = getFirestore(app);

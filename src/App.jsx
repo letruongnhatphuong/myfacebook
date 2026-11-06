@@ -13,6 +13,8 @@ import {
 } from '@mui/material';
 import Login from './Login.jsx';
 import Marketplace from './Marketplace.jsx';
+import Sell from './Sell.jsx';
+import SellButton from './components/SellButton.jsx';
 
 function App() {
   const { pathname } = useLocation();
@@ -58,9 +60,11 @@ function App() {
 
           <Container component="main" sx={{ py: 4, minWidth: 0 }}>
             {authError && <Alert severity="error" sx={{ mb: 2 }}>{authError}</Alert>}
+            {page === '/marketplace' && <SellButton />}
             <Routes>
               <Route path="/" element={<Login />} />
               <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/sell" element={<Sell user={user} authReady={authReady} />} />
               <Route path="*" element={<Typography component="h1" variant="h5">Page not found</Typography>} />
             </Routes>
           </Container>

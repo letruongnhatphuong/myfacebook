@@ -1,5 +1,6 @@
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -12,6 +13,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import CartContext from './context/CartContext'
+import { getAllProducts } from './services/productService.js';
 
 const ITEMS = [
   {
@@ -38,6 +40,24 @@ const Marketplace = () => {
 
   const { handleAddToCart } = useContext(CartContext);
   const [favourites, setFavourites] = useState([]);
+  const [listedProducts, setListedProducts] = useState([]);
+  const [loadError, setLoadError] = useState('');
+
+  // Load the products users listed on the Sell page from the database.
+  useEffect(() => {
+    let ignore = false;
+    getAllProducts()
+      .then((products) => {
+        if (!ignore) setListedProducts(products);
+      })
+      .catch(() => {
+        if (!ignore) setLoadError('Unable to load items listed by users. Showing featured items only.');
+      });
+    return () => { ignore = true; };
+  }, []);
+
+  // User listings first (newest first), then the featured items.
+  const items = [...listedProducts, ...ITEMS];
 
   const handleFavourite = (id) => {
     if (favourites.includes(id)) {
@@ -55,6 +75,7 @@ const Marketplace = () => {
       <Typography color="text.secondary" sx={{ mb: 3 }}>
         Items for sale
       </Typography>
+      {loadError && <Alert severity="warning" sx={{ mb: 2 }}>{loadError}</Alert>}
 
       <Box
         sx={{
@@ -68,14 +89,23 @@ const Marketplace = () => {
         }}
       >
         {
-          ITEMS.map((item) => {
+          items.map((item) => {
             const isFavourite = favourites.includes(item.id);
 
             return (
               <Card component="article" key={item.id}>
-                <Box sx={{ bgcolor: 'grey.100', textAlign: 'center', p: 3, fontSize: 64 }}>
-                  {item.emoji}
-                </Box>
+                {item.image ? (
+                  <Box
+                    component="img"
+                    src={item.image}
+                    alt={item.name}
+                    sx={{ width: '100%', height: 144, objectFit: 'cover', display: 'block' }}
+                  />
+                ) : (
+                  <Box sx={{ bgcolor: 'grey.100', textAlign: 'center', p: 3, fontSize: 64 }}>
+                    {item.emoji || '📦'}
+                  </Box>
+                )}
                 <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Box>
                     <Typography fontWeight="bold">${item.price}</Typography>

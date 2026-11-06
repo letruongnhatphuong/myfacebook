@@ -15,7 +15,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/DeleteIcon';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 function formatPrice(price) {
   return price === 0 ? 'Free' : `$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;

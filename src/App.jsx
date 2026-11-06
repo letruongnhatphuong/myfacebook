@@ -1,11 +1,13 @@
 import { Route, Routes, useLocation } from 'react-router-dom';
 import CartContext from './context/CartContext.js';
 import Navbar from './components/Navbar.jsx';
+import Sidebar from './components/Sidebar.jsx';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebase.js';
 import {
   Alert,
+  Box,
   Container,
   Typography,
 } from '@mui/material';
@@ -48,16 +50,22 @@ function App() {
 
   return (
     <CartContext.Provider value={{ cartItems, handleAddToCart }}>
-      {page !== '/' && <Navbar user={user} authReady={authReady} loggingOut={loggingOut} onLogout={handleLogout} />}
+      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        {page !== '/' && <Navbar user={user} authReady={authReady} loggingOut={loggingOut} onLogout={handleLogout} />}
 
-      <Container component="main" sx={{ py: 4 }}>
-        {authError && <Alert severity="error" sx={{ mb: 2 }}>{authError}</Alert>}
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="*" element={<Typography component="h1" variant="h5">Page not found</Typography>} />
-        </Routes>
-      </Container>
+        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
+          {page !== '/' && <Sidebar />}
+
+          <Container component="main" sx={{ py: 4, minWidth: 0 }}>
+            {authError && <Alert severity="error" sx={{ mb: 2 }}>{authError}</Alert>}
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="*" element={<Typography component="h1" variant="h5">Page not found</Typography>} />
+            </Routes>
+          </Container>
+        </Box>
+      </Box>
     </CartContext.Provider>
   );
 }

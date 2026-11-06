@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  updateProfile,
+} from 'firebase/auth';
 import { auth } from './firebase.js';
 import {
   Alert,
@@ -23,12 +28,44 @@ function Login() {
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const isSignUp = mode === 'signup';
+  const [messageType, setMessageType] = useState('error');
+
+  async function handleResetPassword(event) {
+    if (submitting) return;
+
+    const emailInput =
+      event.currentTarget.form.elements.namedItem('email');
+
+    if (!emailInput.reportValidity()) return;
+
+    setMessage('');
+    setMessageType('error');
+    setSubmitting(true);
+
+    try {
+      await sendPasswordResetEmail(auth, emailInput.value.trim());
+
+      setMessageType('success');
+      setMessage(
+        'If an account uses this email, you will receive a password reset link. Check your inbox and spam folder.'
+      );
+    } catch {
+      setMessage(
+        'Unable to send the reset email. Check your connection and try again later.'
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
+
     if (submitting) return;
     const data = new FormData(event.currentTarget);
     setMessage('');
+    setMessageType('error');
+
     if (isSignUp && data.get('password') !== data.get('confirmPassword')) {
       setPasswordError('Passwords must match.');
       return;
@@ -132,6 +169,7 @@ function Login() {
                 onChange={() => setPasswordError('')}
               />
             )}
+
             <FormControlLabel
               control={
                 <Checkbox
@@ -141,10 +179,22 @@ function Login() {
               }
               label="Show password"
             />
+
             <Button disabled={submitting} type="submit" variant="contained" size="large" fullWidth>
               {submitting ? 'Please wait…' : isSignUp ? 'Create account' : 'Log in'}
             </Button>
-            {message && <Alert severity="error">{message}</Alert>}
+
+            {!isSignUp && (
+              <Button
+                type="button"
+                onClick={handleResetPassword}
+                disabled={submitting}
+              >
+                Forgot password?
+              </Button>
+            )}
+
+            {message && <Alert severity={messageType}>{message}</Alert>}
           </Stack>
         </CardContent>
       </Card>

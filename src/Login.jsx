@@ -7,6 +7,8 @@ import {
   Button,
   Card,
   CardContent,
+  Checkbox,
+  FormControlLabel,
   Stack,
   Tab,
   Tabs,
@@ -19,6 +21,7 @@ function Login() {
   const [message, setMessage] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const isSignUp = mode === 'signup';
 
   async function handleSubmit(event) {
@@ -85,6 +88,7 @@ function Login() {
             setMode(value);
             setMessage('');
             setPasswordError('');
+            setShowPassword(false);
           }}
           variant="fullWidth"
           aria-label="Account access"
@@ -107,7 +111,7 @@ function Login() {
             <TextField
               label="Password"
               name="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               autoComplete={isSignUp ? 'new-password' : 'current-password'}
               required
               fullWidth
@@ -119,7 +123,7 @@ function Login() {
               <TextField
                 label="Confirm password"
                 name="confirmPassword"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
                 required
                 fullWidth
@@ -128,6 +132,15 @@ function Login() {
                 onChange={() => setPasswordError('')}
               />
             )}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={showPassword}
+                  onChange={(event) => setShowPassword(event.target.checked)}
+                />
+              }
+              label="Show password"
+            />
             <Button disabled={submitting} type="submit" variant="contained" size="large" fullWidth>
               {submitting ? 'Please wait…' : isSignUp ? 'Create account' : 'Log in'}
             </Button>

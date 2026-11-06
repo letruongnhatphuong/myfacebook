@@ -31,13 +31,24 @@ export async function addProduct(ownerId, product) {
   return { id: docRef.id, ...newProduct };
 }
 
+// Turns query results into plain product objects, newest first.
+function toProducts(snapshot) {
+  return snapshot.docs
+    .map((productDoc) => ({ id: productDoc.id, ...productDoc.data() }))
+    .sort((a, b) => b.createdAt - a.createdAt);
+}
+
+// Loads every product listed by any user (used by the marketplace page).
+export async function getAllProducts() {
+  const snapshot = await getDocs(getProductsCollection());
+  return toProducts(snapshot);
+}
+
 // Loads only the products created by the given user, newest first.
 export async function getUserProducts(ownerId) {
   const userProductsQuery = query(getProductsCollection(), where('ownerId', '==', ownerId));
   const snapshot = await getDocs(userProductsQuery);
-  return snapshot.docs
-    .map((productDoc) => ({ id: productDoc.id, ...productDoc.data() }))
-    .sort((a, b) => b.createdAt - a.createdAt);
+  return toProducts(snapshot);
 }
 
 // Permanently removes one product document.

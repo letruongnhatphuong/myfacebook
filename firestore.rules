@@ -4,8 +4,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /products/{productId} {
-      // Any logged-in user can read listings (needed for the marketplace).
-      allow read: if request.auth != null;
+      // Anyone can browse listings, because the marketplace page is public.
+      allow read: if true;
 
       // Users can only create products under their own account.
       allow create: if request.auth != null

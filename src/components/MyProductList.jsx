@@ -16,34 +16,63 @@ import {
   Typography,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import SellIcon from '@mui/icons-material/Sell';
 
 function formatPrice(price) {
   return price === 0 ? 'Free' : `$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 }
 
-function MyProductList({ products, onDelete }) {
-  const [productToDelete, setProductToDelete] = useState(null);
-  const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState('');
+// The two actions a seller confirms in the dialog.
+const ACTIONS = {
+  sold: {
+    title: 'Mark this item as sold?',
+    message: (product) => `"${product.name}" will move to your Sold history and ${formatPrice(product.price)} will be added to your revenue. This can't be undone.`,
+    confirm: 'Mark as sold',
+    working: 'Saving…',
+    color: 'primary',
+    error: 'Unable to mark this item as sold. Please try again.',
+  },
+  delete: {
+    title: 'Delete this item?',
+    message: (product) => `"${product.name}" will be removed from your listings. This can't be undone.`,
+    confirm: 'Delete',
+    working: 'Deleting…',
+    color: 'error',
+    error: 'Unable to delete this item. Please try again.',
+  },
+};
+
+function MyProductList({ products, onDelete, onMarkSold }) {
+  // { type: 'sold' | 'delete', product } while the confirm dialog is open
+  const [pendingAction, setPendingAction] = useState(null);
+  const [working, setWorking] = useState(false);
+  const [actionError, setActionError] = useState('');
 
   function closeDialog() {
-    if (deleting) return;
-    setProductToDelete(null);
-    setDeleteError('');
+    if (working) return;
+    setPendingAction(null);
+    setActionError('');
   }
 
-  async function handleConfirmDelete() {
-    setDeleting(true);
-    setDeleteError('');
+  async function handleConfirm() {
+    const { type, product } = pendingAction;
+    setWorking(true);
+    setActionError('');
     try {
-      await onDelete(productToDelete);
-      setProductToDelete(null);
+      if (type === 'sold') {
+        await onMarkSold(product);
+      } else {
+        await onDelete(product);
+      }
+      setPendingAction(null);
     } catch {
-      setDeleteError('Unable to delete this item. Please try again.');
+      setActionError(ACTIONS[type].error);
     } finally {
-      setDeleting(false);
+      setWorking(false);
     }
   }
+
+  const action = pendingAction ? ACTIONS[pendingAction.type] : null;
 
   if (products.length === 0) {
     return (
@@ -98,10 +127,18 @@ function MyProductList({ products, onDelete }) {
             <CardActions>
               <Button
                 fullWidth
+                variant="contained"
+                startIcon={<SellIcon />}
+                onClick={() => setPendingAction({ type: 'sold', product })}
+              >
+                Mark as sold
+              </Button>
+              <Button
+                fullWidth
                 color="error"
                 variant="outlined"
                 startIcon={<DeleteIcon />}
-                onClick={() => setProductToDelete(product)}
+                onClick={() => setPendingAction({ type: 'delete', product })}
               >
                 Delete
               </Button>
@@ -110,20 +147,22 @@ function MyProductList({ products, onDelete }) {
         ))}
       </Box>
 
-      <Dialog open={Boolean(productToDelete)} onClose={closeDialog}>
-        <DialogTitle>Delete this item?</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            &quot;{productToDelete?.name}&quot; will be removed from your listings. This can&apos;t be undone.
-          </DialogContentText>
-          {deleteError && <Alert severity="error" sx={{ mt: 2 }}>{deleteError}</Alert>}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeDialog} disabled={deleting}>Cancel</Button>
-          <Button onClick={handleConfirmDelete} disabled={deleting} color="error" variant="contained">
-            {deleting ? 'Deleting…' : 'Delete'}
-          </Button>
-        </DialogActions>
+      <Dialog open={Boolean(pendingAction)} onClose={closeDialog}>
+        {action && (
+          <>
+            <DialogTitle>{action.title}</DialogTitle>
+            <DialogContent>
+              <DialogContentText>{action.message(pendingAction.product)}</DialogContentText>
+              {actionError && <Alert severity="error" sx={{ mt: 2 }}>{actionError}</Alert>}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={closeDialog} disabled={working}>Cancel</Button>
+              <Button onClick={handleConfirm} disabled={working} color={action.color} variant="contained">
+                {working ? action.working : action.confirm}
+              </Button>
+            </DialogActions>
+          </>
+        )}
       </Dialog>
     </>
   );

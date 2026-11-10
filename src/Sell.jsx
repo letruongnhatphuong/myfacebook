@@ -10,6 +10,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { db } from './firebase.js';
 import { addProduct, deleteProduct, getUserProducts } from './services/productService.js';
+import { markAsSold } from './services/salesService.js';
 import ProductForm from './components/ProductForm.jsx';
 import MyProductList from './components/MyProductList.jsx';
 
@@ -43,6 +44,15 @@ function Sell({ user, authReady }) {
 
   async function handleDelete(product) {
     await deleteProduct(product.id);
+    setUserProducts((current) => ({
+      ...current,
+      items: current.items.filter((item) => item.id !== product.id),
+    }));
+  }
+
+  // Records the sale (Revenue + Sold history) and removes the item from the listings.
+  async function handleMarkSold(product) {
+    await markAsSold(product.id);
     setUserProducts((current) => ({
       ...current,
       items: current.items.filter((item) => item.id !== product.id),
@@ -84,7 +94,7 @@ function Sell({ user, authReady }) {
           {userProducts.error && <Alert severity="error" sx={{ mb: 2 }}>{userProducts.error}</Alert>}
           {loading
             ? <CircularProgress aria-label="Loading your items" />
-            : <MyProductList products={userProducts.items} onDelete={handleDelete} />}
+            : <MyProductList products={userProducts.items} onDelete={handleDelete} onMarkSold={handleMarkSold} />}
         </Box>
       </Box>
     );

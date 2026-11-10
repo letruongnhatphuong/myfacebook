@@ -15,11 +15,14 @@ import Login from './Login.jsx';
 import Marketplace from './Marketplace.jsx';
 import Sell from './Sell.jsx';
 import SellButton from './components/SellButton.jsx';
+import Orders from './Orders.jsx';
+import UserProfile from './UserProfile.jsx';
 
 function App() {
   const { pathname } = useLocation();
   const page = pathname.replace(/\/+$/, '') || '/';
   const [cartItems, setCartItems] = useState([]);
+  const [filters, setFilters] = useState({ item: '', category: '', minPrice: '', maxPrice: '', condition: '' });
   function handleAddToCart(item) {
     setCartItems((items) => [...items, item]);
   }
@@ -56,15 +59,18 @@ function App() {
         {page !== '/' && <Navbar user={user} authReady={authReady} loggingOut={loggingOut} onLogout={handleLogout} />}
 
         <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
-          {page !== '/' && <Sidebar />}
+          {page === '/marketplace' && <Sidebar onApply={setFilters} />}
 
           <Container component="main" sx={{ py: 4, minWidth: 0 }}>
             {authError && <Alert severity="error" sx={{ mb: 2 }}>{authError}</Alert>}
             {page === '/marketplace' && <SellButton />}
             <Routes>
               <Route path="/" element={<Login />} />
-              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/marketplace" element={<Marketplace filters={filters} />} />
               <Route path="/sell" element={<Sell user={user} authReady={authReady} />} />
+              <Route path="/orders" element={<Orders user={user} authReady={authReady} />} />
+              <Route path="/user/profile" element={<UserProfile user={user} authReady={authReady} />} />
+              <Route path="/user/profile/:userId" element={<UserProfile user={user} authReady={authReady} />} />
               <Route path="*" element={<Typography component="h1" variant="h5">Page not found</Typography>} />
             </Routes>
           </Container>

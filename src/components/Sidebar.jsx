@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -37,7 +38,7 @@ const titleStyle = {
   mt: 1,
 };
 
-function Sidebar() {
+function Sidebar({ onApply }) {
   const [item, setItem] = useState('');
   const [category, setCategory] = useState('');
   const [minPrice, setMinPrice] = useState('');
@@ -47,6 +48,7 @@ function Sidebar() {
 
   function handleSubmit(event) {
     event.preventDefault();
+    onApply({ item, category, minPrice, maxPrice, condition });
   }
 
   function handleClear() {
@@ -55,6 +57,7 @@ function Sidebar() {
     setMinPrice('');
     setMaxPrice('');
     setCondition('');
+    onApply({ item: '', category: '', minPrice: '', maxPrice: '', condition: '' });
   }
 
   return (
@@ -62,7 +65,7 @@ function Sidebar() {
       <Typography sx={titleStyle}>Buying</Typography>
 
       <List disablePadding>
-        <ListItemButton>
+        <ListItemButton component={Link} to="/orders">
           <ListItemText primary="Order" />
         </ListItemButton>
       </List>

@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   List,
-  ListItem,
   ListItemButton,
   ListItemText,
   MenuItem,
@@ -109,13 +108,13 @@ function Sidebar({ onApply }) {
 
       {sellingOpen && (
         <List disablePadding>
-          <ListItem>
+          <ListItemButton component={Link} to="/revenue">
             <ListItemText primary="Revenue" />
-          </ListItem>
-          <ListItemButton>
+          </ListItemButton>
+          <ListItemButton component={Link} to="/sell">
             <ListItemText primary="Selling" />
           </ListItemButton>
-          <ListItemButton>
+          <ListItemButton component={Link} to="/sold">
             <ListItemText primary="Sold" />
           </ListItemButton>
         </List>

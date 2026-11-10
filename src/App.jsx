@@ -17,6 +17,8 @@ import Sell from './Sell.jsx';
 import SellButton from './components/SellButton.jsx';
 import Orders from './Orders.jsx';
 import UserProfile from './UserProfile.jsx';
+import Revenue from './Revenue.jsx';
+import Sold from './Sold.jsx';
 
 function App() {
   const { pathname } = useLocation();
@@ -69,6 +71,8 @@ function App() {
               <Route path="/marketplace" element={<Marketplace filters={filters} />} />
               <Route path="/sell" element={<Sell user={user} authReady={authReady} />} />
               <Route path="/orders" element={<Orders user={user} authReady={authReady} />} />
+              <Route path="/revenue" element={<Revenue user={user} authReady={authReady} />} />
+              <Route path="/sold" element={<Sold user={user} authReady={authReady} />} />
               <Route path="/user/profile" element={<UserProfile user={user} authReady={authReady} />} />
               <Route path="/user/profile/:userId" element={<UserProfile user={user} authReady={authReady} />} />
               <Route path="*" element={<Typography component="h1" variant="h5">Page not found</Typography>} />

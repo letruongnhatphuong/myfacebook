@@ -34,25 +34,47 @@ function UserProfile({ user, authReady }) {
   const [profile, setProfile] = useState(null);
   const [soldOrders, setSoldOrders] = useState([]);
   const [reviews, setReviews] = useState([]);
-  const [loaded, setLoaded] = useState(false);
+  const [loadedProfileId, setLoadedProfileId] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!profileId) return;
+    if (!profileId || isOwnProfile) return;
+
+    let cancelled = false;
+    const timeout = setTimeout(() => {
+      if (cancelled) return;
+      setError('Profile details are taking too long to load. Please check your connection and refresh.');
+      setLoadedProfileId(profileId);
+    }, 10000);
 
     async function loadProfile() {
       try {
-        setProfile(await getUserProfile(profileId));
-        setSoldOrders(await getSoldOrders(profileId));
-        setReviews(await getSellerReviews(profileId));
+        const [userProfile, orders, sellerReviews] = await Promise.all([
+          getUserProfile(profileId),
+          getSoldOrders(profileId),
+          getSellerReviews(profileId),
+        ]);
+        if (cancelled) return;
+        setProfile(userProfile);
+        setSoldOrders(orders);
+        setReviews(sellerReviews);
+        setError('');
       } catch {
-        setError('Unable to load this profile. Please try again.');
+        if (!cancelled) {
+          setError('Unable to load profile details, sales, or reviews. Please refresh and try again.');
+        }
+      } finally {
+        clearTimeout(timeout);
+        if (!cancelled) setLoadedProfileId(profileId);
       }
-      setLoaded(true);
     }
 
     loadProfile();
-  }, [profileId]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
+  }, [profileId, isOwnProfile]);
 
   function renderContent() {
     if (!userId && !authReady) {
@@ -65,7 +87,7 @@ function UserProfile({ user, authReady }) {
         </Alert>
       );
     }
-    if (!loaded) {
+    if (loadedProfileId !== profileId) {
       return <CircularProgress aria-label="Loading profile" />;
     }
     if (error) {
@@ -199,9 +221,29 @@ function UserProfile({ user, authReady }) {
         Back to Not Marketplace
       </Button>
       <Typography variant="h5" component="h1" gutterBottom>
-        {isOwnProfile ? 'Your profile' : 'Seller profile'}
+        {!userId || isOwnProfile ? 'Your profile' : 'Seller profile'}
       </Typography>
-      {renderContent()}
+      {isOwnProfile && user && (
+        <Card sx={{ borderRadius: 3, mb: 3 }}>
+          <CardContent>
+            <Typography component="h2" variant="h6" gutterBottom>Account information</Typography>
+            <Stack spacing={1}>
+              <Typography>
+                <strong>Name:</strong> {user.displayName || 'Not set'}
+              </Typography>
+              <Typography sx={{ overflowWrap: 'anywhere' }}>
+                <strong>Email:</strong> {user.email || 'Not set'}
+              </Typography>
+              {user.metadata?.creationTime && (
+                <Typography>
+                  <strong>Member since:</strong> {new Date(user.metadata.creationTime).toLocaleDateString()}
+                </Typography>
+              )}
+            </Stack>
+          </CardContent>
+        </Card>
+      )}
+      {!isOwnProfile && renderContent()}
     </Box>
   );
 }

@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, runTransaction, where } from 'firebase/firestore';
 import { db } from '../firebase.js';
 import { SAMPLE_ORDERS, SAMPLE_REVIEWS, SAMPLE_USERS } from '../data/sampleData.js';
 
@@ -16,6 +16,23 @@ function docsToList(snapshot) {
     list.push({ id: item.id, ...item.data() });
   });
   return list;
+}
+
+export async function ensureUserProfile(user, name) {
+  const profileRef = doc(db, 'users', user.uid);
+  const username = name?.trim() || user.displayName?.trim() || user.email?.split('@')[0] || 'Seller';
+  await runTransaction(db, async (transaction) => {
+    const snapshot = await transaction.get(profileRef);
+    if (!snapshot.exists()) {
+      transaction.set(profileRef, {
+        username,
+        bio: '',
+        joinedAt: Date.parse(user.metadata?.creationTime) || Date.now(),
+      });
+    } else if (name?.trim() || !snapshot.data().username) {
+      transaction.update(profileRef, { username });
+    }
+  });
 }
 
 export async function getUserProfile(userId) {
@@ -43,7 +60,7 @@ export async function getSoldOrders(sellerId) {
       .sort(newestFirst);
   }
   const soldQuery = query(
-    collection(db, 'orders'),
+    collection(db, 'publicSales'),
     where('sellerId', '==', sellerId),
     where('status', '==', 'completed'),
   );

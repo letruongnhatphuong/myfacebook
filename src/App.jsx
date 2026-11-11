@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import CartContext from './context/CartContext.js';
 import Navbar from './components/Navbar.jsx';
 import Sidebar from './components/Sidebar.jsx';
@@ -20,36 +20,53 @@ import Orders from './Orders.jsx';
 import UserProfile from './UserProfile.jsx';
 import Revenue from './Revenue.jsx';
 import Sold from './Sold.jsx';
+import { ensureUserProfile } from './services/profileService.js';
+import { addCartItem, loadCarts, mergeGuestCart, saveCarts } from './utils/cartStorage.js';
 
 function App() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const page = pathname.replace(/\/+$/, '') || '/';
-  const [cartItems, setCartItems] = useState([]);
+  const [carts, setCarts] = useState(() => loadCarts());
   const [filters, setFilters] = useState({ item: '', category: '', minPrice: '', maxPrice: '', condition: '' });
   function handleAddToCart(item) {
-    setCartItems((items) => {
-      const existing = items.find((cartItem) => cartItem.id === item.id);
-      if (existing) {
-        return items.map((cartItem) =>
-          cartItem.id === item.id
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
-        );
-      }
-      return [...items, { ...item, quantity: 1 }];
-    });
+    if (!authReady) return;
+    const owner = user ? user.uid : 'guest';
+    setCarts((current) => ({
+      ...current,
+      [owner]: addCartItem(current[owner] || [], item),
+    }));
   }
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(!auth);
   const [loggingOut, setLoggingOut] = useState(false);
   const [authError, setAuthError] = useState('');
+  const cartItems = authReady ? carts[user ? user.uid : 'guest'] || [] : [];
+
+  useEffect(() => {
+    saveCarts(carts);
+  }, [carts]);
 
   useEffect(() => {
     if (!auth) return;
     return onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      setAuthError('');
+      if (currentUser) {
+        setCarts((current) => mergeGuestCart(current, currentUser.uid));
+        ensureUserProfile(currentUser).catch((error) => {
+          if (auth.currentUser?.uid === currentUser.uid) {
+            const reason = error.code === 'permission-denied'
+              ? 'The database denied access to save your public profile. Please contact the project owner.'
+              : 'Your public profile could not be saved. Check your connection and refresh to retry.';
+            setAuthError(`You are logged in. ${reason}`);
+          }
+        });
+      }
       setAuthReady(true);
     }, () => {
+      setUser(null);
+      setAuthReady(true);
       setAuthError('Unable to check your login status. Please refresh and try again.');
     });
   }, []);
@@ -59,7 +76,8 @@ function App() {
     setAuthError('');
     try {
       await signOut(auth);
-      window.location.assign('/');
+      setLoggingOut(false);
+      navigate('/');
     } catch {
       setAuthError('Unable to log out. Please try again.');
       setLoggingOut(false);
@@ -67,7 +85,7 @@ function App() {
   }
 
   return (
-    <CartContext.Provider value={{ cartItems, handleAddToCart }}>
+    <CartContext.Provider value={{ cartItems, handleAddToCart, cartReady: authReady }}>
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         {page !== '/' && <Navbar user={user} authReady={authReady} loggingOut={loggingOut} onLogout={handleLogout} />}
 

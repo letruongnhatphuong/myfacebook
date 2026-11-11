@@ -1,16 +1,69 @@
 rules_version = '2';
 
-// Paste these rules into Firebase Console > Firestore Database > Rules.
 service cloud.firestore {
   match /databases/{database}/documents {
+    function saleSummary(order) {
+      return {
+        'productId': order.productId,
+        'productName': order.productName,
+        'image': order.image,
+        'price': order.price,
+        'category': order.category,
+        'condition': order.condition,
+        'sellerId': order.sellerId,
+        'status': order.status,
+        'createdAt': order.createdAt
+      };
+    }
+
+    function validSale(orderId) {
+      let product = get(/databases/$(database)/documents/products/$(orderId)).data;
+      let order = request.resource.data;
+      return request.auth != null
+        && product.ownerId == request.auth.uid
+        && order.keys().hasOnly([
+          'productId', 'productName', 'image', 'price', 'category',
+          'condition', 'sellerId', 'buyerId', 'status', 'createdAt'
+        ])
+        && order.productId == orderId
+        && order.sellerId == product.ownerId
+        && order.buyerId == null
+        && order.status == 'completed'
+        && order.productName == product.name
+        && order.image == product.get('image', '')
+        && order.price == product.price
+        && order.price is number && order.price >= 0
+        && order.category == product.get('category', '')
+        && order.condition == product.get('condition', '')
+        && order.createdAt is int && order.createdAt > 0
+        && !existsAfter(/databases/$(database)/documents/products/$(orderId))
+        && getAfter(/databases/$(database)/documents/publicSales/$(orderId)).data == saleSummary(order);
+    }
+
     match /users/{userId} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(['username', 'bio', 'joinedAt'])
+        && request.resource.data.username is string
+        && request.resource.data.username.size() > 0
+        && request.resource.data.bio is string
+        && request.resource.data.joinedAt is int;
+      allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
     match /orders/{orderId} {
+      allow read: if request.auth != null
+        && (resource.data.sellerId == request.auth.uid || resource.data.buyerId == request.auth.uid);
+      allow create: if validSale(orderId);
+      allow update, delete: if false;
+    }
+
+    match /publicSales/{saleId} {
       allow read: if true;
-      allow write: if false;
+      allow create: if request.auth != null
+        && get(/databases/$(database)/documents/products/$(saleId)).data.ownerId == request.auth.uid
+        && request.resource.data == saleSummary(getAfter(/databases/$(database)/documents/orders/$(saleId)).data);
+      allow update, delete: if false;
     }
     match /reviews/{reviewId} {
       allow read: if true;
@@ -18,14 +71,12 @@ service cloud.firestore {
     }
 
     match /products/{productId} {
-      // Anyone can browse listings, because the marketplace page is public.
       allow read: if true;
 
-      // Users can only create products under their own account.
       allow create: if request.auth != null
-        && request.resource.data.ownerId == request.auth.uid;
+        && request.resource.data.ownerId == request.auth.uid
+        && !exists(/databases/$(database)/documents/orders/$(productId));
 
-      // Only the owner can edit or delete a product, and cannot hand it to someone else.
       allow update: if request.auth != null
         && resource.data.ownerId == request.auth.uid
         && request.resource.data.ownerId == request.auth.uid;

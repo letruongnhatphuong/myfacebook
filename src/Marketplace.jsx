@@ -64,7 +64,7 @@ function matchesFilters(product, filters) {
 
 const Marketplace = ({ filters }) => {
 
-  const { cartItems, handleAddToCart } = useContext(CartContext);
+  const { cartItems, handleAddToCart, cartReady } = useContext(CartContext);
   const [favourites, setFavourites] = useState([]);
   const [addedItem, setAddedItem] = useState(null);
   const [listedProducts, setListedProducts] = useState([]);
@@ -175,6 +175,7 @@ const Marketplace = ({ filters }) => {
                 <CardActions>
                   <Button
                     fullWidth
+                    disabled={!cartReady}
                     variant="contained"
                     color={cartEntry ? 'success' : 'primary'}
                     startIcon={cartEntry ? <CheckIcon /> : <AddShoppingCartIcon />}

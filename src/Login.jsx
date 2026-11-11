@@ -6,6 +6,8 @@ import {
   updateProfile,
 } from 'firebase/auth';
 import { auth } from './firebase.js';
+import { useNavigate } from 'react-router-dom';
+import { ensureUserProfile } from './services/profileService.js';
 import {
   Alert,
   Box,
@@ -22,6 +24,7 @@ import {
 } from '@mui/material';
 
 function Login() {
+  const navigate = useNavigate();
   const [mode, setMode] = useState('login');
   const [message, setMessage] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -82,15 +85,23 @@ function Login() {
       if (isSignUp) {
         const credential = await createUserWithEmailAndPassword(auth, email, password);
         try {
-          await updateProfile(credential.user, { displayName: data.get('name').trim() });
+          const name = data.get('name').trim();
+          await updateProfile(credential.user, { displayName: name });
+          await ensureUserProfile(credential.user, name);
         } catch {
-          setMessage('Your account was created, but your name could not be saved. Switch to Log in to continue.');
+          setMessage('Your account was created, but your profile could not be saved. Switch to Log in to retry.');
           return;
         }
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        const credential = await signInWithEmailAndPassword(auth, email, password);
+        try {
+          await ensureUserProfile(credential.user);
+        } catch {
+          setMessage('You are logged in, but your profile could not be saved. Please try logging in again.');
+          return;
+        }
       }
-      window.location.assign('/marketplace');
+      navigate('/marketplace');
     } catch (error) {
       const messages = {
         'auth/invalid-credential': 'The email or password is incorrect.',

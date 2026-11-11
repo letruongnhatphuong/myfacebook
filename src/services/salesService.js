@@ -26,6 +26,7 @@ export async function completeSale(productId, buyerId) {
   const database = requireDb();
   const productRef = doc(database, 'products', productId);
   const orderRef = doc(database, 'orders', productId);
+  const publicSaleRef = doc(database, 'publicSales', productId);
 
   return runTransaction(database, async (transaction) => {
     const productSnapshot = await transaction.get(productRef);
@@ -49,6 +50,17 @@ export async function completeSale(productId, buyerId) {
 
     // Both writes succeed together or not at all.
     transaction.set(orderRef, order);
+    transaction.set(publicSaleRef, {
+      productId: order.productId,
+      productName: order.productName,
+      image: order.image,
+      price: order.price,
+      category: order.category,
+      condition: order.condition,
+      sellerId: order.sellerId,
+      status: order.status,
+      createdAt: order.createdAt,
+    });
     transaction.delete(productRef);
     return { id: orderRef.id, ...order };
   });

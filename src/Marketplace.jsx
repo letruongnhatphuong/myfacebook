@@ -8,6 +8,7 @@ import {
   CardContent,
   Chip,
   IconButton,
+  Snackbar,
   Typography,
 } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -65,6 +66,7 @@ const Marketplace = ({ filters }) => {
 
   const { cartItems, handleAddToCart } = useContext(CartContext);
   const [favourites, setFavourites] = useState([]);
+  const [addedItem, setAddedItem] = useState(null);
   const [listedProducts, setListedProducts] = useState([]);
   const [loadError, setLoadError] = useState('');
   const [sellerNames, setSellerNames] = useState({});
@@ -176,7 +178,10 @@ const Marketplace = ({ filters }) => {
                     variant="contained"
                     color={cartEntry ? 'success' : 'primary'}
                     startIcon={cartEntry ? <CheckIcon /> : <AddShoppingCartIcon />}
-                    onClick={() => handleAddToCart(item)}
+                    onClick={() => {
+                      handleAddToCart(item);
+                      setAddedItem(item);
+                    }}
                   >
                     {cartEntry
                       ? cartEntry.quantity > 1
@@ -190,6 +195,22 @@ const Marketplace = ({ filters }) => {
           })
         }
       </Box>
+
+      <Snackbar
+        open={Boolean(addedItem)}
+        autoHideDuration={3000}
+        onClose={() => setAddedItem(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Alert
+          variant="filled"
+          severity="success"
+          onClose={() => setAddedItem(null)}
+          sx={{ width: '100%' }}
+        >
+          {addedItem && `Added ${addedItem.name} to cart`}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }

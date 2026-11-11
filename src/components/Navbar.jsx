@@ -1,9 +1,13 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AppBar, Box, Button, Container, Menu, MenuItem, TextField, Toolbar } from '@mui/material';
+import { AppBar, Badge, Box, Button, Container, IconButton, Menu, MenuItem, TextField, Toolbar } from '@mui/material';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import CartContext from '../context/CartContext.js';
 
 function Navbar({ user, authReady, loggingOut, onLogout }) {
   const [menuAnchor, setMenuAnchor] = useState(null);
+  const { cartItems } = useContext(CartContext);
+  const cartCount = cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
 
   let userName = '';
   if (user) {
@@ -28,6 +32,12 @@ function Navbar({ user, authReady, loggingOut, onLogout }) {
             slotProps={{ htmlInput: { 'aria-label': 'Search Not Marketplace' } }}
             sx={{ flexGrow: 1, minWidth: 180 }} />
           <Button component={Link} to="/marketplace" variant="outlined">Not Marketplace</Button>
+
+          <IconButton aria-label={`Cart, ${cartCount} items`} title="Cart">
+            <Badge badgeContent={cartCount} color="primary">
+              <ShoppingCartIcon />
+            </Badge>
+          </IconButton>
 
           {authReady && user && (
             <>

@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import Login from './Login.jsx';
 import Marketplace from './Marketplace.jsx';
+import Cart from './Cart.jsx';
 import Sell from './Sell.jsx';
 import SellButton from './components/SellButton.jsx';
 import Orders from './Orders.jsx';
@@ -79,6 +80,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Login />} />
               <Route path="/marketplace" element={<Marketplace filters={filters} />} />
+              <Route path="/cart" element={<Cart />} />
               <Route path="/sell" element={<Sell user={user} authReady={authReady} />} />
               <Route path="/orders" element={<Orders user={user} authReady={authReady} />} />
               <Route path="/revenue" element={<Revenue user={user} authReady={authReady} />} />

@@ -33,7 +33,7 @@ function Navbar({ user, authReady, loggingOut, onLogout }) {
             sx={{ flexGrow: 1, minWidth: 180 }} />
           <Button component={Link} to="/marketplace" variant="outlined">Not Marketplace</Button>
 
-          <IconButton aria-label={`Cart, ${cartCount} items`} title="Cart">
+          <IconButton component={Link} to="/cart" aria-label={`Cart, ${cartCount} items`} title="Cart">
             <Badge badgeContent={cartCount} color="primary">
               <ShoppingCartIcon />
             </Badge>

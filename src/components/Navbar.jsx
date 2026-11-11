@@ -33,7 +33,7 @@ function Navbar({ user, authReady, loggingOut, onLogout, searchText, onSearchTex
       <Container>
         <Toolbar component="nav" disableGutters sx={{ gap: 2, flexWrap: 'wrap', py: 2 }}>
           <Box component={Link} to="/marketplace" onClick={onHome} aria-label="Marketplace home" sx={{ display: 'inline-flex', flexShrink: 0 }}>
-            <Box component="img" src="/not-marketplace.svg" width={40} height={40} alt="" />
+            <Box component="img" src="/not-marketplace.png" width={40} height={40} alt="" />
           </Box>
           <Box component="form" onSubmit={handleSearch} sx={{ display: 'flex', gap: 1, flexGrow: 1, minWidth: 220 }}>
             <TextField

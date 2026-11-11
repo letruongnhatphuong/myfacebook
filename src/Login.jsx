@@ -123,8 +123,13 @@ function Login() {
 
   return (
     <Box sx={{ maxWidth: 440, mx: 'auto', py: { xs: 1, sm: 5 } }}>
-      <Stack alignItems="center" spacing={1} sx={{ mb: 3, textAlign: 'center' }}>
-        <Box component="img" src="/not-marketplace.svg" alt="" width={56} height={56} />
+      <Stack spacing={1} sx={{ alignItems: 'center', mb: 3, textAlign: 'center' }}>
+        <Box
+          component="img"
+          src="/not-marketplace.png"
+          alt="Not Marketplace logo"
+          sx={{ width: { xs: 140, sm: 180 }, height: 'auto', display: 'block' }}
+        />
         <Typography component="h1" variant="h4" fontWeight="bold">Not Marketplace</Typography>
         <Typography color="text.secondary">A place to find your next favorite thing.</Typography>
       </Stack>

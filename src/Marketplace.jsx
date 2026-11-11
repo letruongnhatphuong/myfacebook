@@ -142,10 +142,10 @@ const Marketplace = ({ filters, products, loadError }) => {
                       setAddedItem(item);
                     }}
                   >
-                    {stock === 0 ? 'Out of stock' : limitReached ? `Limit reached (${stock})` : cartEntry
+                    {stock === 0 ? 'Out of stock' : cartEntry
                       ? cartEntry.quantity > 1
-                        ? `In cart (${cartEntry.quantity})`
-                        : 'In cart'
+                        ? `Added (${cartEntry.quantity}) to cart`
+                        : 'Added to cart'
                       : 'Add to cart'}
                   </Button>
                 </CardActions>

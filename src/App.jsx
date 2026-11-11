@@ -37,13 +37,6 @@ function App() {
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [draftFilters, setDraftFilters] = useState(EMPTY_FILTERS);
 
-  function handleSearch(query) {
-    const nextFilters = { ...filters, item: query.trim() };
-    setFilters(nextFilters);
-    setDraftFilters(nextFilters);
-    navigate('/marketplace');
-  }
-
   function handleHome() {
     setFilters(EMPTY_FILTERS);
     setDraftFilters(EMPTY_FILTERS);
@@ -123,9 +116,6 @@ function App() {
             authReady={authReady}
             loggingOut={loggingOut}
             onLogout={handleLogout}
-            searchText={draftFilters.item}
-            onSearchTextChange={(item) => setDraftFilters((current) => ({ ...current, item }))}
-            onSearch={handleSearch}
             onHome={handleHome}
           />
         )}

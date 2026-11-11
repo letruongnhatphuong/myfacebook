@@ -1,10 +1,10 @@
 import { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AppBar, Badge, Box, Button, Container, IconButton, Menu, MenuItem, TextField, Toolbar } from '@mui/material';
+import { AppBar, Badge, Box, Button, Container, IconButton, Menu, MenuItem, Toolbar } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import CartContext from '../context/CartContext.js';
 
-function Navbar({ user, authReady, loggingOut, onLogout, searchText, onSearchTextChange, onSearch, onHome }) {
+function Navbar({ user, authReady, loggingOut, onLogout, onHome }) {
   const [menuAnchor, setMenuAnchor] = useState(null);
   const { cartItems } = useContext(CartContext);
   const cartCount = cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
@@ -23,30 +23,14 @@ function Navbar({ user, authReady, loggingOut, onLogout, searchText, onSearchTex
     onLogout();
   }
 
-  function handleSearch(event) {
-    event.preventDefault();
-    onSearch(searchText);
-  }
-
   return (
     <AppBar position="static" color="inherit" elevation={1}>
       <Container>
         <Toolbar component="nav" disableGutters sx={{ gap: 2, flexWrap: 'wrap', py: 2 }}>
           <Box component={Link} to="/marketplace" onClick={onHome} aria-label="Marketplace home" sx={{ display: 'inline-flex', flexShrink: 0 }}>
-            <Box component="img" src="/not-marketplace.png" width={40} height={40} alt="" />
+            <Box component="img" src="/not-marketplace.png" width={72} height={72} alt="" />
           </Box>
-          <Box component="form" onSubmit={handleSearch} sx={{ display: 'flex', gap: 1, flexGrow: 1, minWidth: 220 }}>
-            <TextField
-              type="search"
-              size="small"
-              placeholder="Search Not Marketplace"
-              value={searchText}
-              onChange={(event) => onSearchTextChange(event.target.value)}
-              slotProps={{ htmlInput: { 'aria-label': 'Search Not Marketplace' } }}
-              sx={{ flexGrow: 1, minWidth: 0 }}
-            />
-            <Button type="submit" variant="outlined">Search</Button>
-          </Box>
+          <Box sx={{ flexGrow: 1 }} />
 
           <IconButton component={Link} to="/cart" aria-label={`Cart, ${cartCount} items`} title="Cart">
             <Badge badgeContent={cartCount} color="primary">

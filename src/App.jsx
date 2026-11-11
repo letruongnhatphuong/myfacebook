@@ -26,7 +26,17 @@ function App() {
   const [cartItems, setCartItems] = useState([]);
   const [filters, setFilters] = useState({ item: '', category: '', minPrice: '', maxPrice: '', condition: '' });
   function handleAddToCart(item) {
-    setCartItems((items) => [...items, item]);
+    setCartItems((items) => {
+      const existing = items.find((cartItem) => cartItem.id === item.id);
+      if (existing) {
+        return items.map((cartItem) =>
+          cartItem.id === item.id
+            ? { ...cartItem, quantity: cartItem.quantity + 1 }
+            : cartItem
+        );
+      }
+      return [...items, { ...item, quantity: 1 }];
+    });
   }
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(!auth);

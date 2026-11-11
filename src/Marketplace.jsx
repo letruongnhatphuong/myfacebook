@@ -13,6 +13,7 @@ import {
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import CheckIcon from '@mui/icons-material/Check';
 import CartContext from './context/CartContext'
 import { Link } from 'react-router-dom';
 import { getAllProducts } from './services/productService.js';
@@ -62,7 +63,7 @@ function matchesFilters(product, filters) {
 
 const Marketplace = ({ filters }) => {
 
-  const { handleAddToCart } = useContext(CartContext);
+  const { cartItems, handleAddToCart } = useContext(CartContext);
   const [favourites, setFavourites] = useState([]);
   const [listedProducts, setListedProducts] = useState([]);
   const [loadError, setLoadError] = useState('');
@@ -130,6 +131,7 @@ const Marketplace = ({ filters }) => {
         {
           items.map((item) => {
             const isFavourite = favourites.includes(item.id);
+            const cartEntry = cartItems.find((cartItem) => cartItem.id === item.id);
 
             return (
               <Card component="article" key={item.id}>
@@ -172,10 +174,15 @@ const Marketplace = ({ filters }) => {
                   <Button
                     fullWidth
                     variant="contained"
-                    startIcon={<AddShoppingCartIcon />}
+                    color={cartEntry ? 'success' : 'primary'}
+                    startIcon={cartEntry ? <CheckIcon /> : <AddShoppingCartIcon />}
                     onClick={() => handleAddToCart(item)}
                   >
-                    Add to cart
+                    {cartEntry
+                      ? cartEntry.quantity > 1
+                        ? `In cart (${cartEntry.quantity})`
+                        : 'In cart'
+                      : 'Add to cart'}
                   </Button>
                 </CardActions>
               </Card>

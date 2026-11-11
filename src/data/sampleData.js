@@ -29,3 +29,39 @@ export const SAMPLE_REVIEWS = [
   { id: 'review-6', sellerId: 'seller-sam', reviewerName: 'Lena K.', rating: 5, comment: 'Books were as described.', createdAt: daysAgo(19) },
   { id: 'review-7', sellerId: 'seller-sam', reviewerName: 'Mike T.', rating: 4, comment: 'One of the books had highlighting, otherwise fine.', createdAt: daysAgo(15) },
 ];
+
+export const SAMPLE_PRODUCTS = [
+  {
+    id: 1,
+    emoji: '🚲',
+    name: 'Bicycle',
+    stock: 1,
+    price: 80,
+    image: '/products/mountain-bike.jpg',
+    category: 'Sports & Outdoors',
+    condition: 'Used - Good',
+    ownerId: 'seller-alex'
+  },
+  {
+    id: 2,
+    emoji: '🪑',
+    name: 'Desk chair',
+    stock: 1,
+    price: 25,
+    image: '/products/desk-chair.jpg',
+    category: 'Furniture',
+    condition: 'Used - Like new',
+    ownerId: 'seller-maya'
+  },
+  {
+    id: 3,
+    emoji: '📚',
+    name: 'Books',
+    stock: 3,
+    price: 15,
+    image: '/products/novels.jpg',
+    category: 'Books',
+    condition: 'Used - Fair',
+    ownerId: 'seller-sam'
+  }
+];

@@ -14,6 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { getSoldQuantity } from './utils/stock.js';
 import {
   getAverageRating,
   getSellerReviews,
@@ -149,8 +150,8 @@ function UserProfile({ user, authReady }) {
               </Box>
               <Box>
                 <Typography variant="overline" color="text.secondary" sx={{ display: 'block', lineHeight: 1.5 }}>Products sold</Typography>
-                <Typography variant="h5" component="p" fontWeight={600}>{soldOrders.length}</Typography>
-                <Typography variant="body2" color="text.secondary">completed orders</Typography>
+                <Typography variant="h5" component="p" fontWeight={600}>{soldOrders.reduce((count, order) => count + getSoldQuantity(order), 0)}</Typography>
+                <Typography variant="body2" color="text.secondary">units sold</Typography>
               </Box>
             </Box>
           </CardContent>
@@ -176,6 +177,7 @@ function UserProfile({ user, authReady }) {
                   )}
                   <CardContent>
                     <Typography component="h3" variant="subtitle1">{order.productName}</Typography>
+                    <Typography variant="body2" color="text.secondary">Qty sold: {getSoldQuantity(order)}</Typography>
                     <Typography fontWeight="bold">${order.price}</Typography>
                     <Typography variant="caption" color="text.secondary">
                       Sold {new Date(order.createdAt).toLocaleDateString()}

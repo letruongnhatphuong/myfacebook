@@ -17,41 +17,9 @@ import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import CheckIcon from '@mui/icons-material/Check';
 import CartContext from './context/CartContext'
 import { Link } from 'react-router-dom';
-import { getAllProducts } from './services/productService.js';
 import { getUsername } from './services/profileService.js';
+import { getStock } from './utils/stock.js';
 
-const ITEMS = [
-  {
-    id: 1,
-    emoji: '🚲',
-    name: 'Bicycle',
-    price: 80,
-    image: '/products/mountain-bike.jpg',
-    category: 'Sports & Outdoors',
-    condition: 'Used - Good',
-    ownerId: 'seller-alex'
-  },
-  {
-    id: 2,
-    emoji: '🪑',
-    name: 'Desk chair',
-    price: 25,
-    image: '/products/desk-chair.jpg',
-    category: 'Furniture',
-    condition: 'Used - Like new',
-    ownerId: 'seller-maya'
-  },
-  {
-    id: 3,
-    emoji: '📚',
-    name: 'Books',
-    price: 15,
-    image: '/products/novels.jpg',
-    category: 'Books',
-    condition: 'Used - Fair',
-    ownerId: 'seller-sam'
-  }
-]
 
 function matchesFilters(product, filters) {
   if (filters.item && !product.name.toLowerCase().includes(filters.item.toLowerCase())) return false;
@@ -62,34 +30,19 @@ function matchesFilters(product, filters) {
   return true;
 }
 
-const Marketplace = ({ filters }) => {
+const Marketplace = ({ filters, products, loadError }) => {
 
   const { cartItems, handleAddToCart, cartReady } = useContext(CartContext);
   const [favourites, setFavourites] = useState([]);
   const [addedItem, setAddedItem] = useState(null);
-  const [listedProducts, setListedProducts] = useState([]);
-  const [loadError, setLoadError] = useState('');
   const [sellerNames, setSellerNames] = useState({});
 
-  // Load the products users listed on the Sell page from the database.
-  useEffect(() => {
-    let ignore = false;
-    getAllProducts()
-      .then((products) => {
-        if (!ignore) setListedProducts(products);
-      })
-      .catch(() => {
-        if (!ignore) setLoadError('Unable to load items listed by users. Showing featured items only.');
-      });
-    return () => { ignore = true; };
-  }, []);
-
-  const items = [...listedProducts, ...ITEMS].filter((product) => matchesFilters(product, filters));
+  const items = products.filter((product) => matchesFilters(product, filters));
 
   useEffect(() => {
     async function loadSellerNames() {
       const names = {};
-      for (const product of [...listedProducts, ...ITEMS]) {
+      for (const product of products) {
         if (product.ownerId && !names[product.ownerId]) {
           names[product.ownerId] = await getUsername(product.ownerId);
         }
@@ -98,7 +51,7 @@ const Marketplace = ({ filters }) => {
     }
 
     loadSellerNames();
-  }, [listedProducts]);
+  }, [products]);
 
   const handleFavourite = (id) => {
     if (favourites.includes(id)) {
@@ -134,6 +87,8 @@ const Marketplace = ({ filters }) => {
           items.map((item) => {
             const isFavourite = favourites.includes(item.id);
             const cartEntry = cartItems.find((cartItem) => cartItem.id === item.id);
+            const stock = getStock(item);
+            const limitReached = (cartEntry?.quantity || 0) >= stock;
 
             return (
               <Card component="article" key={item.id}>
@@ -153,6 +108,9 @@ const Marketplace = ({ filters }) => {
                   <Box>
                     <Typography fontWeight="bold">${item.price}</Typography>
                     <Typography component="h3" variant="subtitle1">{item.name}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {stock === 0 ? 'Out of stock' : `${stock} available`}
+                    </Typography>
                     {item.condition && <Chip size="small" label={item.condition} sx={{ my: 0.5 }} />}
                     {item.ownerId && (
                       <Typography variant="body2" color="text.secondary">
@@ -175,7 +133,7 @@ const Marketplace = ({ filters }) => {
                 <CardActions>
                   <Button
                     fullWidth
-                    disabled={!cartReady}
+                    disabled={!cartReady || limitReached}
                     variant="contained"
                     color={cartEntry ? 'success' : 'primary'}
                     startIcon={cartEntry ? <CheckIcon /> : <AddShoppingCartIcon />}
@@ -184,7 +142,7 @@ const Marketplace = ({ filters }) => {
                       setAddedItem(item);
                     }}
                   >
-                    {cartEntry
+                    {stock === 0 ? 'Out of stock' : limitReached ? `Limit reached (${stock})` : cartEntry
                       ? cartEntry.quantity > 1
                         ? `In cart (${cartEntry.quantity})`
                         : 'In cart'

@@ -7,6 +7,7 @@ import {
   where,
 } from 'firebase/firestore';
 import { db } from '../firebase.js';
+import { getStock } from '../utils/stock.js';
 
 // A sale is one document in the "orders" collection (same fields the Orders and
 // Profile pages already read), created in the same write that removes the product
@@ -35,11 +36,15 @@ export async function completeSale(productId, buyerId) {
     }
 
     const product = productSnapshot.data();
+    const quantity = getStock(product);
+    if (quantity === 0) throw new Error('This item is out of stock.');
     const order = {
       productId,
       productName: product.name,
       image: product.image || '',
-      price: product.price,
+      price: product.price * quantity,
+      unitPrice: product.price,
+      quantity,
       category: product.category || '',
       condition: product.condition || '',
       sellerId: product.ownerId,
@@ -55,6 +60,8 @@ export async function completeSale(productId, buyerId) {
       productName: order.productName,
       image: order.image,
       price: order.price,
+      unitPrice: order.unitPrice,
+      quantity: order.quantity,
       category: order.category,
       condition: order.condition,
       sellerId: order.sellerId,

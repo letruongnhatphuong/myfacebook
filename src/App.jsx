@@ -21,14 +21,33 @@ import UserProfile from './UserProfile.jsx';
 import Revenue from './Revenue.jsx';
 import Sold from './Sold.jsx';
 import { ensureUserProfile } from './services/profileService.js';
-import { addCartItem, loadCarts, mergeGuestCart, saveCarts } from './utils/cartStorage.js';
+import { addCartItem, loadCarts, mergeGuestCart, reconcileCartStock, saveCarts } from './utils/cartStorage.js';
+import { subscribeToProducts } from './services/productService.js';
+import { SAMPLE_PRODUCTS } from './data/sampleData.js';
+
+const EMPTY_FILTERS = { item: '', category: '', minPrice: '', maxPrice: '', condition: '' };
 
 function App() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const page = pathname.replace(/\/+$/, '') || '/';
   const [carts, setCarts] = useState(() => loadCarts());
-  const [filters, setFilters] = useState({ item: '', category: '', minPrice: '', maxPrice: '', condition: '' });
+  const [products, setProducts] = useState(SAMPLE_PRODUCTS);
+  const [productsError, setProductsError] = useState('');
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [draftFilters, setDraftFilters] = useState(EMPTY_FILTERS);
+
+  function handleSearch(query) {
+    const nextFilters = { ...filters, item: query.trim() };
+    setFilters(nextFilters);
+    setDraftFilters(nextFilters);
+    navigate('/marketplace');
+  }
+
+  function handleHome() {
+    setFilters(EMPTY_FILTERS);
+    setDraftFilters(EMPTY_FILTERS);
+  }
   function handleAddToCart(item) {
     if (!authReady) return;
     const owner = user ? user.uid : 'guest';
@@ -42,6 +61,17 @@ function App() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [authError, setAuthError] = useState('');
   const cartItems = authReady ? carts[user ? user.uid : 'guest'] || [] : [];
+
+  useEffect(() => {
+    return subscribeToProducts((listedProducts, fromCache) => {
+      const availableProducts = [...listedProducts, ...SAMPLE_PRODUCTS];
+      setProducts(availableProducts);
+      setProductsError('');
+      if (!fromCache) setCarts((current) => reconcileCartStock(current, availableProducts));
+    }, () => {
+      setProductsError('Unable to load items listed by users. Showing featured items only.');
+    });
+  }, []);
 
   useEffect(() => {
     saveCarts(carts);
@@ -87,17 +117,28 @@ function App() {
   return (
     <CartContext.Provider value={{ cartItems, handleAddToCart, cartReady: authReady }}>
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        {page !== '/' && <Navbar user={user} authReady={authReady} loggingOut={loggingOut} onLogout={handleLogout} />}
+        {page !== '/' && (
+          <Navbar
+            user={user}
+            authReady={authReady}
+            loggingOut={loggingOut}
+            onLogout={handleLogout}
+            searchText={draftFilters.item}
+            onSearchTextChange={(item) => setDraftFilters((current) => ({ ...current, item }))}
+            onSearch={handleSearch}
+            onHome={handleHome}
+          />
+        )}
 
         <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
-          {page === '/marketplace' && <Sidebar onApply={setFilters} />}
+          {page === '/marketplace' && <Sidebar filters={draftFilters} onChange={setDraftFilters} onApply={setFilters} />}
 
           <Container component="main" sx={{ py: 4, minWidth: 0 }}>
             {authError && <Alert severity="error" sx={{ mb: 2 }}>{authError}</Alert>}
             {page === '/marketplace' && <SellButton />}
             <Routes>
               <Route path="/" element={<Login />} />
-              <Route path="/marketplace" element={<Marketplace filters={filters} />} />
+              <Route path="/marketplace" element={<Marketplace filters={filters} products={products} loadError={productsError} />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/sell" element={<Sell user={user} authReady={authReady} />} />
               <Route path="/orders" element={<Orders user={user} authReady={authReady} />} />

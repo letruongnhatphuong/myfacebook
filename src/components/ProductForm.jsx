@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { MAX_IMAGE_FILE_SIZE, resizeImage } from '../utils/imageUtils.js';
+import { MAX_STOCK } from '../utils/stock.js';
 
 const CATEGORIES = [
   'Electronics',
@@ -31,6 +32,7 @@ const CONDITIONS = ['New', 'Used - Like new', 'Used - Good', 'Used - Fair'];
 const EMPTY_PRODUCT = {
   name: '',
   price: '',
+  stock: 1,
   category: '',
   condition: '',
   description: '',
@@ -80,12 +82,19 @@ function ProductForm({ onCreate }) {
     event.preventDefault();
     if (submitting || processingImage) return;
 
+    const stock = Number(product.stock);
+    if (!Number.isSafeInteger(stock) || stock < 1 || stock > MAX_STOCK) {
+      setMessage({ type: 'error', text: `Quantity must be a whole number from 1 to ${MAX_STOCK}.` });
+      return;
+    }
+
     setSubmitting(true);
     setMessage({ type: '', text: '' });
     try {
       await onCreate({
         name: product.name.trim(),
         price: Number(product.price),
+        stock,
         category: product.category,
         condition: product.condition,
         description: product.description.trim(),
@@ -151,6 +160,7 @@ function ProductForm({ onCreate }) {
           />
           <TextField
             label="Price"
+            helperText="Price per item"
             name="price"
             type="number"
             value={product.price}
@@ -161,6 +171,16 @@ function ProductForm({ onCreate }) {
               htmlInput: { min: 0, step: '0.01' },
               input: { startAdornment: <InputAdornment position="start">$</InputAdornment> },
             }}
+          />
+          <TextField
+            label="Quantity available"
+            name="stock"
+            type="number"
+            value={product.stock}
+            onChange={handleChange}
+            required
+            fullWidth
+            slotProps={{ htmlInput: { min: 1, max: MAX_STOCK, step: 1 } }}
           />
           <TextField select label="Category" name="category" value={product.category} onChange={handleChange} required fullWidth>
             {CATEGORIES.map((category) => (

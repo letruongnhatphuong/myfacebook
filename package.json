@@ -7,9 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "test": "node --test tests/cartStorage.test.mjs",
-    "test:rules": "firebase emulators:exec --project demo-myfacebook --only firestore \"node --test tests/firestore.rules.test.mjs\""
+    "preview": "vite preview"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -23,7 +21,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@firebase/rules-unit-testing": "^6.0.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",

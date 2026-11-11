@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SellIcon from '@mui/icons-material/Sell';
+import { getStock } from '../utils/stock.js';
 
 function formatPrice(price) {
   return price === 0 ? 'Free' : `$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
@@ -26,7 +27,7 @@ function formatPrice(price) {
 const ACTIONS = {
   sold: {
     title: 'Mark this item as sold?',
-    message: (product) => `"${product.name}" will move to your Sold history and ${formatPrice(product.price)} will be added to your revenue. This can't be undone.`,
+    message: (product) => `All ${getStock(product)} remaining units of "${product.name}" will be marked as sold and ${formatPrice(product.price * getStock(product))} will be added to your revenue. This can't be undone.`,
     confirm: 'Mark as sold',
     working: 'Saving…',
     color: 'primary',
@@ -107,6 +108,7 @@ function MyProductList({ products, onDelete, onMarkSold }) {
             <CardContent sx={{ flexGrow: 1 }}>
               <Typography fontWeight="bold">{formatPrice(product.price)}</Typography>
               <Typography component="h3" variant="subtitle1">{product.name}</Typography>
+              <Typography variant="body2" color="text.secondary">{getStock(product)} available</Typography>
               <Stack direction="row" spacing={1} sx={{ my: 1, flexWrap: 'wrap', rowGap: 1 }}>
                 <Chip size="small" label={product.condition} />
                 <Chip size="small" variant="outlined" label={product.category} />

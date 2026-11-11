@@ -1,3 +1,5 @@
+import { getStock } from './stock.js';
+
 const STORAGE_KEY = 'notmarketplace-carts';
 
 function validItem(item) {
@@ -13,7 +15,9 @@ export function loadCarts(storage) {
     if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return {};
     return Object.fromEntries(Object.entries(saved)
       .filter(([, items]) => Array.isArray(items))
-      .map(([owner, items]) => [owner, items.filter(validItem)]));
+      .map(([owner, items]) => [owner, items.filter(validItem)
+        .filter((item) => getStock(item) > 0)
+        .map((item) => ({ ...item, quantity: Math.min(item.quantity, getStock(item)) }))]));
   } catch {
     return {};
   }
@@ -29,13 +33,27 @@ export function saveCarts(carts, storage) {
 }
 
 export function addCartItem(items, item, quantity = 1) {
+  if (!Number.isSafeInteger(quantity) || quantity < 1) return items;
+  const stock = getStock(item);
+  if (stock === 0) return items.filter((entry) => entry.id !== item.id);
   const existing = items.find((entry) => entry.id === item.id);
   if (existing) {
     return items.map((entry) => entry.id === item.id
-      ? { ...entry, quantity: entry.quantity + quantity }
+      ? { ...entry, ...item, quantity: Math.min(entry.quantity + quantity, stock) }
       : entry);
   }
-  return [...items, { ...item, quantity }];
+  return [...items, { ...item, quantity: Math.min(quantity, stock) }];
+}
+
+export function reconcileCartStock(carts, products) {
+  const available = new Map(products.map((product) => [product.id, product]));
+  return Object.fromEntries(Object.entries(carts).map(([owner, items]) => [owner,
+    items.flatMap((item) => {
+      const product = available.get(item.id);
+      if (!product || getStock(product) === 0) return [];
+      return [{ ...item, ...product, quantity: Math.min(item.quantity, getStock(product)) }];
+    }),
+  ]));
 }
 
 export function mergeGuestCart(carts, userId) {

@@ -14,9 +14,11 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { db } from './firebase.js';
 import useSales from './hooks/useSales.js';
 import { buyerLabel, formatMoney } from './utils/salesUtils.js';
+import { getSoldQuantity } from './utils/stock.js';
 
 function Sold({ user, authReady }) {
   const { sales, buyerNames, error, loading } = useSales(user);
+  const unitsSold = sales.reduce((count, sale) => count + getSoldQuantity(sale), 0);
 
   function renderContent() {
     if (!authReady) {
@@ -54,7 +56,7 @@ function Sold({ user, authReady }) {
       <>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 2 }}>
           <Typography component="h2" variant="h6">
-            {sales.length === 1 ? '1 item sold' : `${sales.length} items sold`}
+            {unitsSold === 1 ? '1 item sold' : `${unitsSold} items sold`}
           </Typography>
           <Button component={Link} to="/revenue" size="small">View revenue</Button>
         </Box>
@@ -76,6 +78,7 @@ function Sold({ user, authReady }) {
                   <Typography component="h3" variant="subtitle1">{sale.productName}</Typography>
                   <Typography fontWeight="bold">{formatMoney(Number(sale.price))}</Typography>
                 </Box>
+                <Typography variant="body2" color="text.secondary">Qty sold: {getSoldQuantity(sale)}</Typography>
                 <Stack direction="row" spacing={1} sx={{ my: 1, flexWrap: 'wrap', rowGap: 1 }}>
                   <Chip size="small" color="success" label="Sold" />
                   {sale.condition && <Chip size="small" label={sale.condition} />}

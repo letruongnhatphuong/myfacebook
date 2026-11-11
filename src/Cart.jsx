@@ -11,6 +11,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CartContext from './context/CartContext.js';
 import { formatMoney } from './utils/salesUtils.js';
+import { getStock } from './utils/stock.js';
 
 function lineTotal(item) {
   return Number(item.price) * (item.quantity || 1);
@@ -53,6 +54,9 @@ function Cart() {
                   {item.condition && <Chip size="small" label={item.condition} sx={{ mt: 0.5 }} />}
                   <Typography variant="body2" color="text.secondary">
                     {formatMoney(Number(item.price))} each · Qty: {item.quantity || 1}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {getStock(item)} available
                   </Typography>
                 </Box>
                 <Typography fontWeight="bold">{formatMoney(lineTotal(item))}</Typography>

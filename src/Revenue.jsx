@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { getSoldQuantity } from './utils/stock.js';
 import {
   Alert,
   Box,
@@ -132,8 +133,8 @@ function Revenue({ user, authReady }) {
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2 }}>
           <StatCard label="Total revenue" value={formatMoney(total)} note="all time" />
           <StatCard label="This month" value={formatMoney(totalRevenue(thisMonth))} note={`${thisMonth.length} sold this month`} />
-          <StatCard label="Items sold" value={sales.length} note="completed sales" />
-          <StatCard label="Average sale" value={formatMoney(total / sales.length)} note="per item" />
+          <StatCard label="Items sold" value={sales.reduce((count, sale) => count + getSoldQuantity(sale), 0)} note="units sold" />
+          <StatCard label="Average sale" value={formatMoney(total / sales.length)} note="per completed sale" />
         </Box>
 
         <Card sx={{ borderRadius: 3 }}>
@@ -164,7 +165,7 @@ function Revenue({ user, authReady }) {
                 {rows.map((sale) => (
                   <TableRow key={sale.id}>
                     <TableCell>{new Date(sale.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell>{sale.productName}</TableCell>
+                    <TableCell>{sale.productName} · Qty: {getSoldQuantity(sale)}</TableCell>
                     <TableCell>{buyerLabel(sale, buyerNames)}</TableCell>
                     <TableCell align="right">{formatMoney(Number(sale.price))}</TableCell>
                     <TableCell align="right">{formatMoney(sale.runningTotal)}</TableCell>

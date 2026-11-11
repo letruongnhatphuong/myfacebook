@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { getBuyerOrders } from './services/profileService.js';
+import { getSoldQuantity } from './utils/stock.js';
 
 const STATUS_COLORS = { completed: 'success', shipped: 'info', pending: 'warning' };
 
@@ -78,6 +79,7 @@ function Orders({ user, authReady }) {
               )}
               <Box sx={{ flexGrow: 1 }}>
                 <Typography component="h2" variant="subtitle1">{order.productName}</Typography>
+                <Typography variant="body2" color="text.secondary">Qty: {getSoldQuantity(order)}</Typography>
                 <Typography variant="body2" color="text.secondary">
                   Sold by <Link to={`/user/profile/${order.sellerId}`}>{order.sellerName}</Link>
                   {' · '}

@@ -60,8 +60,9 @@ function App() {
       ...current,
       [owner]: (current[owner] || []).map((entry) => {
         if (entry.id !== itemId) return entry;
-        const stock = getStock(entry);
-        return { ...entry, quantity: Math.max(1, Math.min(quantity, stock)) };
+        const product = products.find((candidate) => candidate.id === itemId);
+        const stock = getStock(product || entry);
+        return { ...entry, ...(product || {}), quantity: Math.max(1, Math.min(quantity, stock)) };
       }),
     }));
   }
@@ -131,7 +132,7 @@ function App() {
   }
 
   return (
-    <CartContext.Provider value={{ cartItems, handleAddToCart, handleClearCart, handleUpdateQuantity, handleRemoveFromCart, cartReady: authReady }}>
+    <CartContext.Provider value={{ cartItems, products, handleAddToCart, handleClearCart, handleUpdateQuantity, handleRemoveFromCart, cartReady: authReady }}>
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         {page !== '/' && (
           <Navbar

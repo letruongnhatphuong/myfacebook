@@ -23,7 +23,7 @@ function lineTotal(item) {
 }
 
 function Cart() {
-  const { cartItems, handleUpdateQuantity, handleRemoveFromCart } = useContext(CartContext);
+  const { cartItems, products, handleUpdateQuantity, handleRemoveFromCart } = useContext(CartContext);
 
   return (
     <Box component="section">
@@ -43,7 +43,8 @@ function Cart() {
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {cartItems.map((item) => {
             const quantity = item.quantity || 1;
-            const stock = getStock(item);
+            const product = products.find((candidate) => candidate.id === item.id);
+            const stock = getStock(product || item);
 
             return (
               <Card component="article" key={item.id}>

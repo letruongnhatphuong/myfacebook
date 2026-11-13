@@ -22,6 +22,7 @@ import Revenue from './Revenue.jsx';
 import Sold from './Sold.jsx';
 import { ensureUserProfile } from './services/profileService.js';
 import { addCartItem, loadCarts, mergeGuestCart, reconcileCartStock, saveCarts } from './utils/cartStorage.js';
+import { getStock } from './utils/stock.js';
 import { subscribeToProducts } from './services/productService.js';
 import { SAMPLE_PRODUCTS } from './data/sampleData.js';
 
@@ -47,6 +48,28 @@ function App() {
     setCarts((current) => ({
       ...current,
       [owner]: addCartItem(current[owner] || [], item),
+    }));
+  }
+  function handleClearCart() {
+    const owner = user ? user.uid : 'guest';
+    setCarts((current) => ({ ...current, [owner]: [] }));
+  }
+  function handleUpdateQuantity(itemId, quantity) {
+    const owner = user ? user.uid : 'guest';
+    setCarts((current) => ({
+      ...current,
+      [owner]: (current[owner] || []).map((entry) => {
+        if (entry.id !== itemId) return entry;
+        const stock = getStock(entry);
+        return { ...entry, quantity: Math.max(1, Math.min(quantity, stock)) };
+      }),
+    }));
+  }
+  function handleRemoveFromCart(itemId) {
+    const owner = user ? user.uid : 'guest';
+    setCarts((current) => ({
+      ...current,
+      [owner]: (current[owner] || []).filter((entry) => entry.id !== itemId),
     }));
   }
   const [user, setUser] = useState(null);
@@ -108,7 +131,7 @@ function App() {
   }
 
   return (
-    <CartContext.Provider value={{ cartItems, handleAddToCart, cartReady: authReady }}>
+    <CartContext.Provider value={{ cartItems, handleAddToCart, handleClearCart, handleUpdateQuantity, handleRemoveFromCart, cartReady: authReady }}>
       <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         {page !== '/' && (
           <Navbar
